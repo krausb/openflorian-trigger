@@ -1,0 +1,9 @@
+# Slotmachine Trigger Button Listener
+# @copyright Modehaus Pogoretschnik GmbH
+# @author Bastian Kraus <bk@pogo-systems.de>
+
+## trigger settings
+slotmachine.trigger.device = /dev/input/eventX
+
+## API Connection
+slotmachine.api.trigger = http://<SERVERURL>/api/trigger
