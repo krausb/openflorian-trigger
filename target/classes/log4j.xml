@@ -26,48 +26,9 @@
 		</layout>
 	</appender>
 
-    <logger name="org.jboss.resteasy">
-        <level value="INFO" />
-    </logger>
-
-	<logger name="org.apache.struts2">
-		<level value="info" />
-	</logger>
-
-	<logger name="org.springframework.web">
-		<level value="info" />
-	</logger>
-
-	<logger name="com.opensymphony.xwork2">
-		<level value="info" />
-	</logger>
-	
-	<logger name="com.opensymphony.sitemesh">
-	   <level value="info" />
-	</logger>
-
-    <logger name="org.zkoss">
-        <level value="info" />
-    </logger>
-
-    <logger name="org.apache.felix">
-        <level value="info" />
-    </logger>
-
-	<logger name="de.pogosystems">
+	<logger name="de.openflorian">
 		<level value="DEBUG" />
-	</logger>
-
-	<logger name="org.hibernate">
-		<level value="WARN" />
-	</logger>
-	
-	<logger name="org.hibernate.SQL">
-	   <level value="INFO"/>
-	</logger>
-	
-	<logger name="org.twitter4j">
-	   <level value="INFO"/>
+		<appender-ref ref="stdout" />
 	</logger>
 
 	<root>

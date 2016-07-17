@@ -1,35 +1,9 @@
 package de.openflorian.trigger;
 
-/*
- * This file is part of Openflorian.
- * 
- * Copyright (C) 2015  Bastian Kraus
- * 
- * Openflorian is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version)
- *     
- * Openflorian is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *     
- * You should have received a copy of the GNU General Public License
- * along with Openflorian.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -92,64 +66,29 @@ public class Buzzer implements EventDelegate {
 
 		final CommandLineParser cParser = new DefaultParser();
 
-		boolean startBuzzer = false;
-		String triggerDevice = null;
-		String apiTriggerUrl = null;
+		final boolean startBuzzer = false;
+		final String triggerDevice = BuzzerConfig.config().triggerDevice;
+		final String apiTriggerUrl = BuzzerConfig.config().apiEndpoint;
+
+		if (StringUtils.isEmpty(triggerDevice))
+			throw new IllegalStateException("No trigger device set.");
+		if (StringUtils.isEmpty(apiTriggerUrl))
+			throw new IllegalStateException("No API URL set.");
+
+		final Buzzer b = new Buzzer();
+
+		b.setTriggerUrl(apiTriggerUrl);
+
+		final Thread observerThread = new Thread(new BuzzerDeviceObserver(triggerDevice, b));
+		observerThread.setDaemon(true);
+		observerThread.start();
 
 		try {
-			final CommandLine cLine = cParser.parse(options, arg);
-
-			if (cLine.hasOption("c")) {
-				log.info("Trying to load configuration from '" + cLine.getOptionValue("c") + "'...");
-				final File configFile = new File(cLine.getOptionValue("c"));
-
-				if (configFile.exists() && configFile.canRead()) {
-					log.info("Configuration successfuly loaded.. trying to get configuration parameters...");
-					final Properties prop = new Properties();
-					prop.load(new FileInputStream(configFile));
-
-					triggerDevice = String.valueOf(prop.get(CONF_TRIGGER_DEVICE));
-					log.info("Value for '" + CONF_TRIGGER_DEVICE + "': " + triggerDevice);
-
-					apiTriggerUrl = String.valueOf(prop.get(CONF_API_URL_TRIGGER));
-					log.info("Value for '" + CONF_API_URL_TRIGGER + "': " + apiTriggerUrl);
-
-					startBuzzer = true;
-					log.info("Configuration loaded... Buzzer ready to start :-)");
-				}
-				else {
-					throw new IOException("Requested config file '" + configFile.getAbsolutePath() + "' does not exist!");
-				}
-			}
-
+			while (true)
+				Thread.sleep(200);
 		}
-		catch (final ParseException e) {
+		catch (final Exception e) {
 			log.error(e.getMessage(), e);
-		}
-		catch (final IOException e) {
-			log.error(e.getMessage(), e);
-		}
-
-		if (startBuzzer) {
-			final Buzzer b = new Buzzer();
-
-			b.setTriggerUrl(apiTriggerUrl);
-
-			final Thread watchDogThread = new Thread(new WatchDog(triggerDevice, b));
-			watchDogThread.setDaemon(true);
-			watchDogThread.start();
-
-			try {
-				while (true)
-					Thread.sleep(200);
-			}
-			catch (final Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-		else {
-			final HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java -jar slotmachine-trigger-<VERSION>.jar", options);
 		}
 	}
 

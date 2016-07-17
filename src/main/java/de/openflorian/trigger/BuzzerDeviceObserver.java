@@ -33,14 +33,15 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Bastian Kraus <bofh@k-hive.de>
  */
-public class WatchDog implements Runnable {
+public class BuzzerDeviceObserver implements Runnable {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private final EventDelegate delegate;
-	private String triggerDevice;
+	private final String triggerDevice;
 
-	public WatchDog(String triggerDevice, EventDelegate delegate) {
+	public BuzzerDeviceObserver(String triggerDevice, EventDelegate delegate) {
+		this.triggerDevice = triggerDevice;
 		this.delegate = delegate;
 	}
 
@@ -54,7 +55,7 @@ public class WatchDog implements Runnable {
 			int cycle = 0;
 			final char[] b = new char[125];
 			while (in.read(b, 0, 125) != -1) {
-				if (cycle == 1) {
+				if (cycle == 2) {
 					log.debug("Trigger event finished :-) Propagating to delegate...");
 					delegate.trigger();
 					cycle = 0;

@@ -23,7 +23,7 @@ package de.openflorian.trigger;
  * Trigger Pushed Event Delegate Interface<br/>
  * <br/>
  * Interface is used for delegation of trigger pushed events<br/>
- * propagated through {@link WatchDog} Worker.<br/>
+ * propagated through {@link BuzzerDeviceObserver} Worker.<br/>
  * 
  * @author Bastian Kraus <bofh@k-hive.de>
  */

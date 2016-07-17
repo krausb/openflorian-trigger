@@ -1,0 +1,4 @@
+{
+	"trigger_device": "/dev/input/by-id/usb-Cleware_GmbH_USB-Keys_63813-event-kbd",
+	"api_endpoint": "http://localhost:8080/openflorian/rest/api/alarm/current"
+}
