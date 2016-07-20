@@ -17,7 +17,7 @@
 	</appender>
 
 	<appender name="fileAppender" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="slotmachine-trigger.log" />
+		<param name="File" value="openflorian-trigger.log" />
 		<param name="DatePattern" value="'.'yyyy-MM-dd" />
 		<param name="Append" value="true" />
 		<param name="Threshold" value="TRACE" />

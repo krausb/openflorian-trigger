@@ -108,6 +108,12 @@
 			<version>${sl4j.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-core</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+
 		<!-- Apache Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

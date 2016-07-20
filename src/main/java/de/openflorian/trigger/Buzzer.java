@@ -1,14 +1,16 @@
 package de.openflorian.trigger;
 
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
 
 /**
  * Buzzer Main (Executable)
@@ -19,7 +21,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Bastian Kraus <bofh@k-hive.dee>
  */
-public class Buzzer implements EventDelegate {
+public class Buzzer extends AbstractVerticle {
+	private static Logger log = LoggerFactory.getLogger(Buzzer.class);
 
 	/**
 	 * Configuration property for Slotmachine API Trigger URL
@@ -31,27 +34,21 @@ public class Buzzer implements EventDelegate {
 	 */
 	public static final String CONF_TRIGGER_DEVICE = "slotmachine.trigger.device";
 
-	/**
-	 * Setter for Slotmachine API Trigger URL
-	 * 
-	 * @param url {@link String}
-	 */
-	public void setTriggerUrl(String o) {
-		this.triggerUrl = o;
+	public static final String BUZZER_EVENTBUS_ADDRESS = "Buzzer.triggerApi";
+
+	private final String triggerUrl;
+
+	private final String triggerDevice;
+
+	public Buzzer() {
+		this.triggerDevice = BuzzerConfig.config().triggerDevice;
+		this.triggerUrl = BuzzerConfig.config().apiEndpoint;
+
+		if (StringUtils.isEmpty(triggerDevice))
+			throw new IllegalStateException("No trigger device set.");
+		if (StringUtils.isEmpty(triggerUrl))
+			throw new IllegalStateException("No API URL set.");
 	}
-
-	/**
-	 * Getter for Slotmachine API Trigger URL
-	 * 
-	 * @return {@link String}
-	 */
-	public String getTriggerUrl() {
-		return this.triggerUrl;
-	}
-
-	private String triggerUrl = null;
-
-	private static Logger log = LoggerFactory.getLogger(Buzzer.class);
 
 	/**
 	 * Booting the Buzzer
@@ -59,41 +56,23 @@ public class Buzzer implements EventDelegate {
 	 * @param arg
 	 */
 	public static void main(String[] arg) {
-		log.info("Starting Trigger Finger!");
+		log.info("Starting Trigger Finger ;-) (I I follow... i follow you... ;-)");
 
-		final Options options = new Options();
-		options.addOption("c", true, "Configuration file");
-
-		final CommandLineParser cParser = new DefaultParser();
-
-		final boolean startBuzzer = false;
-		final String triggerDevice = BuzzerConfig.config().triggerDevice;
-		final String apiTriggerUrl = BuzzerConfig.config().apiEndpoint;
-
-		if (StringUtils.isEmpty(triggerDevice))
-			throw new IllegalStateException("No trigger device set.");
-		if (StringUtils.isEmpty(apiTriggerUrl))
-			throw new IllegalStateException("No API URL set.");
-
-		final Buzzer b = new Buzzer();
-
-		b.setTriggerUrl(apiTriggerUrl);
-
-		final Thread observerThread = new Thread(new BuzzerDeviceObserver(triggerDevice, b));
-		observerThread.setDaemon(true);
-		observerThread.start();
-
-		try {
-			while (true)
-				Thread.sleep(200);
-		}
-		catch (final Exception e) {
-			log.error(e.getMessage(), e);
-		}
+		final Vertx vertx = Vertx.vertx();
+		vertx.deployVerticle(new Buzzer());
 	}
 
 	@Override
-	public void trigger() {
+	public void start() throws Exception {
+		log.info("Deploy Buzzer Verticle...");
+
+		vertx.eventBus().consumer(BUZZER_EVENTBUS_ADDRESS, message -> trigger(message));
+
+		vertx.deployVerticle(new BuzzerDeviceObserverVerticle(this.triggerDevice),
+				new DeploymentOptions().setWorker(true));
+	}
+
+	private void trigger(Message<Object> msg) {
 		try {
 			log.info("Trigger pushed :-)");
 			sendToServer();
@@ -110,12 +89,16 @@ public class Buzzer implements EventDelegate {
 	 * @throws Exception
 	 */
 	private synchronized void sendToServer() throws Exception {
-		final CloseableHttpClient hc = HttpClients.createDefault();
-		// init connection
-		final HttpPost post = new HttpPost(triggerUrl);
-		// send post request
-		hc.execute(post);
-		log.info("Request successfuly sent to server! (URL: " + this.triggerUrl + ")");
+		try (final CloseableHttpClient hc = HttpClients.createDefault();) {
+			// init connection
+			final HttpDelete deleteRequest = new HttpDelete(triggerUrl);
+			// send post request
+			hc.execute(deleteRequest);
+			log.info("Request successfuly sent to server! (URL: " + this.triggerUrl + ")");
+		}
+		catch (final Exception e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 
 }
