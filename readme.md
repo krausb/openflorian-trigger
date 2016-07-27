@@ -1,7 +1,7 @@
-# Openflorian Alarm Workflow System
+# Openflorian-Trigger
 
 ## Description
-Openflorian is a alarm workflow system that transforms telefax messages sent from alarm coordination center to local rescue departments into web content to display on screens in rescue car halls.
+Using the f-pro.de USB Buzzer and a little peace of java software to access the Operation Reset REST API Resource of OpenFlorian (http://www.f-pro.de/buzzer/). The Buzzer is attached as USB Keyboard and available as linux device under /dev. OpenFlorian-Trigger is a Java and Vert.X based daemon watching the device and in case of someones pushing the button an event is triggered and fires a call to a defined REST resource endpoint.
 
 ## Licence
 
@@ -21,27 +21,10 @@ You should have received a copy of the GNU General Public License
 along with Openflorian.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Architecture
-Openflorian is a Java based Servlet 3.0 Web Application with a Vert.X Reactive Core. It runs on Servlet 3.0 Containers and utilizes Tesseract to transform telefax files received from telefax daemon into readable text and parses it with regular expressions to display the informations on interactive html pages.
+OpenFlorian-Trigger is a Java and Vert.X based daemon watching the device and in case of someones pushing the button an event is triggered and fires a call to a defined REST resource endpoint.
 
 ## Technology Openflorian runs on
 
 ### Server
 * Hardware: runs best on Raspberry PI 3 Model B
 * Operating System: Raspbian Linux (https://www.raspbian.org/)
-* Database: MySQL 5.x
-* Application Server: Apache Tomcat 8.x (http://tomcat.apache.org/tomcat-8.0-doc/index.html)
-* UI Framework: Vaadin (https://vaadin.com/home)
-* Reactive Core: Vert.X (http://vertx.io/)
-* OCR Framework: Tesseract (https://github.com/tesseract-ocr/tesseract)
-* Telefax Daemon: Hylafax (http://www.hylafax.org/content/Main_Page)
-
-### Viewer
-* Hardware: runs best on Raspberry PI 3 Model B
-* Operating System: Raspbian Linux (https://www.raspbian.org/)
-* Display Manager: LightDM
-* Browser: Iceweasel/Firefox
-
-## Installation Manuals
-
-* [Server Installation](install-server.md)
-* [Viewer Installation](install-viewer.md)

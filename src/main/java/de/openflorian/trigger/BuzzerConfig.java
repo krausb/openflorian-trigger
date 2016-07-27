@@ -39,7 +39,7 @@ public class BuzzerConfig {
 
 	private static final Logger log = LoggerFactory.getLogger(BuzzerConfig.class);
 
-	public static final String CONFIG_FILE_PARAM = "configfile";
+	public static final String CONFIG_FILE_PARAM = "config";
 
 	private static final String CONFIG_FILE = "/config.json";
 
